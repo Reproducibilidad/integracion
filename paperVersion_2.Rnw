@@ -14,11 +14,10 @@
 \author{
         Estrella Delcurso\\
         Escuela de Ingeniería\\
-        Universidad de los Andes\\
-        Bogotá,\underline{Colombia}\\
-        \texttt{estrelladc@uniandes.edu.col}
+        Universidad de la vida\\
+        \texttt{estrelladc@vida.edu}
 }
-\date{30 de Junio de 2018}
+\date{}
 
 %%%%
 \begin{document}
