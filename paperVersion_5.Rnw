@@ -220,28 +220,28 @@ library(rgdal)
 folder='world_map'
 file='world_map.shp'
 mapaFile=file.path(folder,file)
-colRegs <- rgdal::readOGR(mapaFile,stringsAsFactors=F) 
+mapaMundo= rgdal::readOGR(mapaFile,stringsAsFactors=F) 
 @
 
 <<checkNames, echo=FALSE,eval=FALSE>>=
-names(colRegs)
+names(mapaMundo)
 @
 
 <<mergeMap,echo=FALSE>>=
-colRegsIdx=merge(colRegs,dataidx, by.x='NAME', by.y='Country',all.x=F)
+mapaMundoAll=merge(mapaMundo,dataidx, by.x='NAME', by.y='Country',all.x=F)
 @
 
 <<checkSize, echo=F,eval=F>>=
-nrow(colRegsIdx)
-nrow(colRegs)
+nrow(mapaMundoAll)
+nrow(mapaMundo)
 @
 
 \begin{figure}[h]
 \centering
 \begin{adjustbox}{width=11cm,height=8cm,clip,trim=1.5cm 2.5cm 0cm 2.5cm}
 <<plotMap1, echo=FALSE, fig=TRUE>>=
-plot(colRegs,col='black')
-plot(colRegsIdx,col='pink',border='grey',add=T)
+plot(mapaMundo,col='black')
+plot(mapaMundoAll,col='pink',border='grey',add=T)
 @
 \end{adjustbox}
 \caption{Paises con información diponible}\label{rawmap}

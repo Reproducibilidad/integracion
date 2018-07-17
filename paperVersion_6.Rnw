@@ -232,23 +232,32 @@ library(rgdal)
 folder='world_map'
 file='world_map.shp'
 mapaFile=file.path(folder,file)
-colRegs <- rgdal::readOGR(mapaFile,stringsAsFactors=F) 
-colRegsIdx=merge(colRegs,dataidx, by.x='NAME', by.y='Country',all.x=F)
+mapaMundo = rgdal::readOGR(mapaFile,stringsAsFactors=F) 
+mapaMundoAll=merge(mapaMundo,dataidx, by.x='NAME', by.y='Country',all.x=F)
 @
 
 
 <<echo=FALSE>>=
-dimensions=c("NAME","EconomicFreedom","PressFreedom","Democracy")
+# nombres de las variables a utilizar
+dimensions=c("EconomicFreedom","PressFreedom","Democracy")
+#creando subconjunto
+dataCluster=mapaMundoAll@data[,c(dimensions)]
+# indicando que la data numerica es ordinal:
+dataCluster=as.data.frame(lapply(dataCluster,as.ordered))
+# llamando librería:
 library(cluster)
-dataCluster=colRegsIdx@data[,c(dimensions)]
-dataCluster[,-1]=lapply(dataCluster[,-1],as.ordered)
-row.names(dataCluster)=dataCluster$NAME
-dist=daisy(dataCluster[,-1],metric = "gower")
+# creando matriz de distancias
+dist=daisy(dataCluster,metric = "gower")
+# aplicando algoritmo
 pam_fit <- pam(dist, diss = TRUE, k = 3)
-clusters=as.data.frame(pam_fit$clustering)
-clusters$NAME=row.names(clusters)
-names(clusters)=c('cluster','NAME')
-colRegsIdx=merge(colRegsIdx,clusters, by='NAME',all.x=F)
+# añadiendo los clusters al mapa:
+mapaMundoAll$cluster=pam_fit$clustering
+# check:
+# aggregate(Democracy~cluster, data=mapaMundoAll,FUN=mean,na.rm=T)
+#recodificando
+library(car)
+mapaMundoAll$cluster<-recode(mapaMundoAll$cluster,
+                             "1=2;2=3;3=1")
 @
 
 
@@ -257,19 +266,25 @@ colRegsIdx=merge(colRegsIdx,clusters, by='NAME',all.x=F)
 \centering
 \begin{adjustbox}{width=11cm,height=8cm,clip,trim=1cm 2.5cm 0cm 2.5cm}
 <<plotMap1, echo=FALSE, fig=TRUE>>=
+# que se pintara:
+varToPlot=mapaMundoAll$cluster
+
+#cuantos colores:
+numberOfColors = length(unique(varToPlot)) 
+
+#qué colores:
 library(RColorBrewer)
-library(classInt)
-varToPLot=colRegsIdx$cluster
-numberOfClasses = length(unique(varToPLot)) 
 colorForScale='Set2'
-paleta = brewer.pal(numberOfClasses, colorForScale)
-plot(colRegs,col='grey',border=0)
-plot(colRegsIdx, col = paleta[varToPLot],border=F,add=T)
-legend('left', legend = c("MEDIUM","LOW","UP"), # third change
-       fill = paleta, # fourth change
+paleta = brewer.pal(numberOfColors, colorForScale)
+
+# a dibujar:
+plot(mapaMundo,col='grey',border=0)
+plot(mapaMundoAll, col = paleta[varToPlot],border=F,add=T)
+legend('left', legend = c("TOP","MEDIUM","LOW"), 
+       fill = paleta,
        cex = 0.6, 
        bty = "n",
-       title="conglomerado")
+       title="Conglomerado")
 @
 \end{adjustbox}
 \caption{Paises conglomerados segun sus indicadores sociopolíticos}\label{clustmap}
